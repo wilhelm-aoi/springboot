@@ -1,8 +1,11 @@
 package com.demo1.blogspringboot.controller;
 
 import com.demo1.blogspringboot.common.Result;
+import com.demo1.blogspringboot.entity.CustomPage;
 import com.demo1.blogspringboot.entity.User;
 import com.demo1.blogspringboot.service.UserService;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +17,7 @@ import java.util.List;
  * 作者: wilhelmaoi
  * 目期: 2024年9月5日 23:22
  */
+@CrossOrigin
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -111,13 +115,13 @@ public class UserController {
 
 
     @GetMapping("/selectByPage")
-    public Result getUsers(@RequestParam int pageNum,
-                           @RequestParam int pageSize,
+    public Result getUsers(@RequestParam Integer pageNum,
+                           @RequestParam Integer pageSize,
                            @RequestParam(required = false) String username,
                            @RequestParam(required = false) String name) {
         // 调用Service层进行分页查询
-        PageInfo<User> pageInfo = userService.selectByPage(username, name, pageNum, pageSize);
-        return Result.success(pageInfo);
+        CustomPage page = userService.selectByPage(username, name, pageNum, pageSize);
+        return Result.success(page);
     }
 
 

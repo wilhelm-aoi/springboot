@@ -1,10 +1,16 @@
 package com.demo1.blogspringboot.service;
 
+import com.demo1.blogspringboot.entity.CustomPage;
 import com.demo1.blogspringboot.entity.User;
+import com.demo1.blogspringboot.exception.ServiceException;
 import com.demo1.blogspringboot.mapper.UserMapper;
+import com.demo1.blogspringboot.utils.TokenUtils;
+import com.github.pagehelper.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.rmi.ServerException;
 import java.util.List;
 
 /**
@@ -53,13 +59,44 @@ public class UserService {
     }
 
 
-    public PageInfo<User> selectByPage(String username, String name, int pageNum, int pageSize) {
+    public CustomPage selectByPage(String username, String name, Integer pageNum, Integer pageSize) {
         // 开启分页
         PageHelper.startPage(pageNum, pageSize);
         // 查询数据
         List<User> userList = userMapper.selectByLike(username, name);
         // 使用PageInfo封装分页信息
-        return new PageInfo<>(userList);
+        PageInfo<User> pageInfo = new PageInfo<>(userList);
+
+
+        // 返回分页信息：注意使用pageInfo.getTotal()获取总记录数
+        return new CustomPage((int) pageInfo.getTotal(), pageInfo.getList());
+    }
+    // 验证用户是否合法
+    public User login(User user) {
+        // 根据用户名查询数据库的用户信息
+        User dbUser = userMapper.selectByUsername(user.getUsername());
+        if (dbUser == null){
+            // 抛出自定义异常
+            throw new ServiceException("用户名或密码错误");
+        }
+        if(!user.getPassword().equals(dbUser.getPassword())){
+            throw new ServiceException("用户名或密码错误");
+
+        }//生成token
+        String token = TokenUtils.createToken(dbUser.getId().toString(), dbUser.getPassword());
+        dbUser.setToken(token);
+        return dbUser;
+    }
+
+    public User register(User user) {
+        User dbUser = userMapper.selectByUsername(user.getUsername());
+        if (dbUser != null) {
+            // 抛出一个自定义的异常
+            throw new ServiceException("用户名已存在");
+        }
+        user.setName(user.getUsername());
+        userMapper.insert(user);
+        return user;
     }
 }
 
