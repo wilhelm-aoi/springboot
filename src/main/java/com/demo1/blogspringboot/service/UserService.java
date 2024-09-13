@@ -50,6 +50,9 @@ public class UserService {
     public User selectById(Integer id) {
         return userMapper.selectById(id);
     }
+//    public User selectByUsername(String username) {
+//        return userMapper.selectByUsername(username);
+//    }
     public List<User> selectByMore(String username, String name) {
         return userMapper.selectByMore(username,name);
     }
@@ -98,5 +101,7 @@ public class UserService {
         userMapper.insert(user);
         return user;
     }
+
+
 }
 

@@ -89,7 +89,6 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.demo1.blogspringboot.BlogSpringbootApplication</mainClass>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>

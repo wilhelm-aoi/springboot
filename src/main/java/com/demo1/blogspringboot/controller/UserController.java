@@ -83,6 +83,11 @@ public class UserController {
         User user = userService.selectById(id);
         return Result.success(user);
     }
+//    @GetMapping("/selectById/{username}")
+//    public Result selectById(@PathVariable String username) {
+//        User user = userService.selectByUsername(username);
+//        return Result.success(user);
+//    }
 
     /**
      * 多条件查询
@@ -123,6 +128,7 @@ public class UserController {
         CustomPage page = userService.selectByPage(username, name, pageNum, pageSize);
         return Result.success(page);
     }
+
 
 
 }
