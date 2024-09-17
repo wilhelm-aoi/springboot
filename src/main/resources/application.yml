@@ -4,12 +4,17 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/blog?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://${ip}:3306/blog?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
     username: root
     password: password
-
+  servlet:
+    multipart:
+      max-request-size: 20MB
+      max-file-size: 20MB
 
 pagehelper:
   propertyName: propertyValue
   reasonable: false
   defaultCount: true # 分页插件默认参数支持 default-count 形式，自定义扩展的参数，必须大小写一致
+
+ip: localhost
