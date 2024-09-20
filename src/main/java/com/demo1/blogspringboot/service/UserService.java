@@ -103,5 +103,19 @@ public class UserService {
     }
 
 
+    public void resetPassword(User user) {
+        User dbUser = userMapper.selectByUsername(user.getUsername());
+        if (dbUser == null) {
+            // 抛出一个自定义的异常
+            throw new ServiceException("用户不存在");
+        }
+        if (!user.getPhone().equals(dbUser.getPhone())) {
+            throw new ServiceException("验证错误");
+        }else{
+            dbUser.setPassword(user.getPassword());   // 重置密码
+            userMapper.update(dbUser);
+        }
+
+    }
 }
 
