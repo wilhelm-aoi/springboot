@@ -1,11 +1,13 @@
 package com.demo1.blogspringboot.controller;
 
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.demo1.blogspringboot.common.Result;
 import com.demo1.blogspringboot.entity.CustomPage;
 import com.demo1.blogspringboot.entity.User;
 import com.demo1.blogspringboot.service.UserService;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageInfo;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +32,7 @@ public class UserController {
      */
     @PostMapping("/add")
     public Result add(@RequestBody User user) {
-        userService.insertUser(user);
+        userService.save(user);
         return Result.success();
     }
 
@@ -40,7 +42,7 @@ public class UserController {
 
     @PutMapping("/update")
     public Result update(@RequestBody User user) {
-        userService.updateUser(user);
+        userService.updateById(user);
         return Result.success();
     }
 
@@ -51,7 +53,7 @@ public class UserController {
 
     @DeleteMapping("/delete/{id}")
     public Result delete(@PathVariable Integer id) {
-        userService.deleteUser(id);
+        userService.removeById(id);
         return Result.success();
     }
 
@@ -61,7 +63,7 @@ public class UserController {
 
     @DeleteMapping("/delete/batch")
     public Result batchDelete(@RequestBody List<Integer> ids) {
-        userService.batchDelete(ids);
+        userService.removeBatchByIds(ids);
         return Result.success();
     }
 
@@ -71,7 +73,7 @@ public class UserController {
 
     @GetMapping("/selectAll")
     public Result selectAll() {
-        List<User> userAll = userService.selectAll();
+        List<User> userAll = userService.list(new QueryWrapper<User>().orderByDesc( "id"));
         return Result.success(userAll);
     }
 
@@ -80,37 +82,37 @@ public class UserController {
      */
     @GetMapping("/selectById/{id}")
     public Result selectById(@PathVariable Integer id) {
-        User user = userService.selectById(id);
+        User user = userService.getById(id);
         return Result.success(user);
     }
+
 //    @GetMapping("/selectById/{username}")
 //    public Result selectById(@PathVariable String username) {
 //        User user = userService.selectByUsername(username);
 //        return Result.success(user);
 //    }
-
-    /**
-     * 多条件查询
-     */
-    @GetMapping("/selectByMore")
-    public Result selectByMore(@RequestParam String username, @RequestParam String name) {
-        List<User> userList = userService.selectByMore(username, name);
-        return Result.success(userList);
-    }
-
-
-    /**
-     * 多条件模糊查询用户信息
-     */
-    @GetMapping("/selectByLike")
-    public Result selectByLike(@RequestParam String username, @RequestParam String name) {
-        List<User> userList = userService.selectByLike(username, name);
-        return Result.success(userList);
-
-    }
-    /**
-     * 分页查询
-     */
+//    /**
+//     * 多条件查询
+//     */
+//    @GetMapping("/selectByMore")
+//    public Result selectByMore(@RequestParam String username, @RequestParam String name) {
+//        List<User> userList = userService.getBy(username, name);
+//        return Result.success(userList);
+//    }
+//
+//
+//    /**
+//     * 多条件模糊查询用户信息
+//     */
+//    @GetMapping("/selectByLike")
+//    public Result selectByLike(@RequestParam String username, @RequestParam String name) {
+//        List<User> userList = userService.selectByLike(username, name);
+//        return Result.success(userList);
+//
+//    }
+//    /**
+//     * 分页查询
+//     */
 //    @GetMapping("/selectByPage")
 //    public Result selectByPage(@RequestParam String username, @RequestParam String name) {
 //        List<User> userList = userService.selectByLike(username, name);
@@ -119,13 +121,21 @@ public class UserController {
 //    }
 
 
+    /**
+     * 多条件模糊查询用户信息
+     * pageNum 当前的页码
+     * pageSize 每页查询的个数
+     */
     @GetMapping("/selectByPage")
-    public Result getUsers(@RequestParam Integer pageNum,
-                           @RequestParam Integer pageSize,
-                           @RequestParam(required = false) String username,
-                           @RequestParam(required = false) String name) {
-        // 调用Service层进行分页查询
-        CustomPage page = userService.selectByPage(username, name, pageNum, pageSize);
+    public Result selectByPage(@RequestParam Integer pageNum,
+                               @RequestParam Integer pageSize,
+                               @RequestParam String username,
+                               @RequestParam String name) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<User>().orderByDesc("id");  // 默认倒序，让最新的数据在最上面
+        queryWrapper.like(StrUtil.isNotBlank(username), "username", username);
+        queryWrapper.like(StrUtil.isNotBlank(name), "name", name);
+        // select * from user where username like '%#{username}%' and name like '%#{name}%'
+        Page<User> page = userService.page(new Page<>(pageNum, pageSize), queryWrapper);
         return Result.success(page);
     }
 
