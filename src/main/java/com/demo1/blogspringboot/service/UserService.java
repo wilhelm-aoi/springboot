@@ -35,6 +35,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         }
         return super.save(entity);
     }
+
     public User selectByUsername(String username) {
         QueryWrapper<User> queryWrapper =new QueryWrapper<>();
         queryWrapper.eq("username", username);  //  eq => ==   where username = #{username}

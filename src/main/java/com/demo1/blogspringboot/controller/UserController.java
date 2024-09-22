@@ -32,8 +32,15 @@ public class UserController {
      */
     @PostMapping("/add")
     public Result add(@RequestBody User user) {
-        userService.save(user);
-        return Result.success();
+        // 查询数据库中是否存在相同的用户名
+        User existingUser = userService.selectByUsername(user.getUsername());
+        if (existingUser != null) {
+            return Result.error("用户名已存在");
+        } else {
+            // 如果不存在，保存用户
+            userService.save(user);
+            return Result.success();
+        }
     }
 
     /**
