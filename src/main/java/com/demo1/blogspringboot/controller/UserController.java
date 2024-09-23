@@ -1,6 +1,8 @@
 package com.demo1.blogspringboot.controller;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.demo1.blogspringboot.common.Result;
@@ -8,10 +10,17 @@ import com.demo1.blogspringboot.entity.CustomPage;
 import com.demo1.blogspringboot.entity.User;
 import com.demo1.blogspringboot.service.UserService;
 
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -146,6 +155,35 @@ public class UserController {
         return Result.success(page);
     }
 
+
+    @GetMapping("/export")
+    public void exportData(@RequestParam(required = false) String username,
+                           @RequestParam(required = false) String name,
+                           @RequestParam(required = false) String ids,  //   1,2,3,4,5
+                           HttpServletResponse response) throws IOException {
+        ExcelWriter writer = ExcelUtil.getWriter(true);
+
+        List<User> list;
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        if (StrUtil.isNotBlank(ids)) {     // ["1", "2", "3"]   => [1,2,3]
+            List<Integer> idsArr1 = Arrays.stream(ids.split(",")).map(Integer::valueOf).collect(Collectors.toList());
+            queryWrapper.in("id", idsArr1);
+        } else {
+            // 第一种全部导出或者条件导出
+            queryWrapper.like(StrUtil.isNotBlank(username), "username", username);
+            queryWrapper.like(StrUtil.isNotBlank(name), "name", name);
+        }
+        list = userService.list(queryWrapper);   // 查询出当前User表的所有数据
+        writer.write(list, true);
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("用户信息表", "UTF-8") + ".xlsx");
+        ServletOutputStream outputStream = response.getOutputStream();
+        writer.flush(outputStream, true);
+        writer.close();
+        outputStream.flush();
+        outputStream.close();
+    }
 
 
 }
