@@ -23,8 +23,11 @@ import java.util.Optional;
 @RequestMapping("/file")
 public class FileController {
 
-   @Value("${ip:localhost}")
+    @Value("${ip:localhost}")
     private String ip;
+
+    @Value("${protocol:https://}")
+    private String protocol;
 
     @Value("${server.port}")
     private String port;
@@ -46,7 +49,7 @@ public class FileController {
             }
             File saveFile = new File(ROOT_PATH + File.separator + newFilename);
             file.transferTo(saveFile);  // 保存文件
-            String url = "http://" + ip + ":" + port + "/file/download/" + newFilename;  // 构建文件下载链接
+            String url = protocol + ip + ":" + port + "/file/download/" + newFilename;  // 构建文件下载链接
             return Result.success(url);  // 返回成功结果
         } catch (IOException e) {
             return Result.error("文件上传失败: " + e.getMessage());  // 捕获文件保存异常
